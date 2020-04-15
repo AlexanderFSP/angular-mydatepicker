@@ -73,24 +73,6 @@ export class DayViewComponent implements OnChanges {
     }
   }
 
-  onDayCellMouseEnter(cell: any): void {
-    if (this.utilService.isInitializedDate(this.selectedDateRange.begin) && !this.utilService.isInitializedDate(this.selectedDateRange.end)) {
-      for (const w of this.dates) {
-        for (const day of w.week) {
-          day.range = this.utilService.isDateSameOrEarlier(this.selectedDateRange.begin, day.dateObj) && this.utilService.isDateSameOrEarlier(day.dateObj, cell.dateObj);
-        }
-      }
-    }
-  }
-
-  onDayCellMouseLeave(): void {
-    for (const w of this.dates) {
-      for (const day of w.week) {
-        day.range = false;
-      }
-    }
-  }
-
   isDateInRange(date: IMyDate): boolean {
     return this.utilService.isDateInRange(date, this.selectedDateRange);
   }
@@ -101,5 +83,13 @@ export class DayViewComponent implements OnChanges {
 
   isDateRangeBeginOrEndSame(date: IMyDate): boolean {
     return this.utilService.isDateRangeBeginOrEndSame(this.selectedDateRange, date);
+  }
+
+  isDateRangeBegin(date: IMyDate): boolean {
+    return this.utilService.isDateRangeBegin(this.selectedDateRange, date);
+  }
+
+  isDateRangeEnd(date: IMyDate): boolean {
+    return this.utilService.isDateRangeEnd(this.selectedDateRange, date);
   }
 }
