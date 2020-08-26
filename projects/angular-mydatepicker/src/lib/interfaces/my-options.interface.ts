@@ -24,8 +24,6 @@ export interface IMyOptions {
   markCurrentDay?: boolean;
   markCurrentMonth?: boolean;
   markCurrentYear?: boolean;
-  monthSelector?: boolean;
-  yearSelector?: boolean;
   disableHeaderButtons?: boolean;
   showWeekNumbers?: boolean;
   selectorHeight?: string;
@@ -45,7 +43,6 @@ export interface IMyOptions {
   closeSelectorOnDocumentClick?: boolean;
   minYear?: Year;
   maxYear?: Year;
-  showSelectorArrow?: boolean;
   appendSelectorToBody?: boolean;
   focusInputOnDateSelect?: boolean;
   moveFocusByArrowKeys?: boolean;

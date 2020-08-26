@@ -21,6 +21,9 @@
           'myDpRangeBeginDay': this.opts.dateRange && isDateRangeBegin(d.dateObj),
           'myDpRangeEndDay': this.opts.dateRange && isDateRangeEnd(d.dateObj),
           'myDpDisabled': d.disabled,
+          'myDpDisabledRangeBegin': isDisabledRangeBegin(d),
+          'myDpDisabledRangeEnd': isDisabledRangeEnd(d),
+          'myDpDisabledRange': isDisabledRange(d),
           'myDpTableSingleDay': !d.disabled
         }"
         (click)="onDayCellClicked($event, d)"

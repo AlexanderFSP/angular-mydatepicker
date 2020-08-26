@@ -219,9 +219,6 @@ export class AngularMyDatePickerDirective implements OnChanges, OnDestroy, Contr
     if (this.opts.maxYear > Year.max) {
       this.opts.maxYear = Year.max;
     }
-    if (this.opts.openSelectorTopOfInput || this.opts.inline) {
-      this.opts.showSelectorArrow = false;
-    }
     if (this.opts.inline) {
       this.openCalendar();
     }
@@ -571,7 +568,7 @@ export class AngularMyDatePickerDirective implements OnChanges, OnDestroy, Contr
     let top: number = 0;
     let left: number = 0;
 
-    const {appendSelectorToBody, openSelectorTopOfInput, selectorHeight, selectorWidth, showSelectorArrow, alignSelectorRight} = this.opts;
+    const {appendSelectorToBody, openSelectorTopOfInput, selectorHeight, selectorWidth, alignSelectorRight} = this.opts;
 
     if (appendSelectorToBody) {
       const b: any = document.body.getBoundingClientRect();
@@ -582,9 +579,8 @@ export class AngularMyDatePickerDirective implements OnChanges, OnDestroy, Contr
 
     if (openSelectorTopOfInput) {
       top = top - this.getSelectorDimension(selectorHeight) - 2;
-    }
-    else {
-      top = top + elem.offsetHeight + (showSelectorArrow ? 12 : 2);
+    } else {
+      top = top + elem.offsetHeight + 2;
     }
 
     if (alignSelectorRight) {

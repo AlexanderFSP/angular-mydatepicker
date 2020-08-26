@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewEncapsulation, ViewChild, Renderer2, ChangeDetectorRef, AfterViewInit, OnDestroy, HostBinding} from "@angular/core";
+import {Component, ElementRef, ViewEncapsulation, ViewChild, Renderer2, AfterViewInit, HostBinding} from "@angular/core";
 import {IMyDate} from "../../interfaces/my-date.interface";
 import {IMyDateRange} from "../../interfaces/my-date-range.interface";
 import {IMyMonth} from "../../interfaces/my-month.interface";
@@ -16,10 +16,8 @@ import {IMyValidateOptions} from "../../interfaces/my-validate-options.interface
 import {UtilService} from "../../services/angular-mydatepicker.util.service";
 import {KeyCode} from "../../enums/key-code.enum";
 import {MonthId} from "../../enums/month-id.enum";
-import {DefaultView} from "../../enums/default-view.enum";
 import {CalAnimation} from "../../enums/cal-animation.enum";
-import {DOT, UNDER_LINE, D, M, Y, DATE_ROW_COUNT, DATE_COL_COUNT, MONTH_ROW_COUNT, MONTH_COL_COUNT, YEAR_ROW_COUNT, YEAR_COL_COUNT, 
-  SU, MO, TU, WE, TH, FR, SA, EMPTY_STR, CLICK, STYLE, MY_DP_ANIMATION, ANIMATION_NAMES, IN, OUT, TABINDEX, TD_SELECTOR, ZERO_STR, YEAR_SEPARATOR} from "../../constants/constants";
+import {DOT, UNDER_LINE, D, DATE_ROW_COUNT, DATE_COL_COUNT, SU, MO, TU, WE, TH, FR, SA, EMPTY_STR, STYLE, MY_DP_ANIMATION, ANIMATION_NAMES, IN, OUT, TABINDEX, TD_SELECTOR, ZERO_STR } from "../../constants/constants";
 
 @Component({
   selector: "lib-angular-mydatepicker-calendar",
@@ -28,7 +26,7 @@ import {DOT, UNDER_LINE, D, M, Y, DATE_ROW_COUNT, DATE_COL_COUNT, MONTH_ROW_COUN
   providers: [UtilService],
   encapsulation: ViewEncapsulation.None
 })
-export class CalendarComponent implements AfterViewInit, OnDestroy {
+export class CalendarComponent implements AfterViewInit {
   @ViewChild("selectorEl") selectorEl: ElementRef;
   @ViewChild("styleEl") styleEl: ElementRef;
   
@@ -43,12 +41,8 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
   dates: Array<IMyWeek> = [];
   months: Array<Array<IMyCalendarMonth>> = [];
   years: Array<Array<IMyCalendarYear>> = [];
-  yearsDuration: string = "";
-  dayIdx: number = 0;
+  dayIdx = 0;
   weekDayOpts: Array<string> = [SU, MO, TU, WE, TH, FR, SA];
-
-  selectMonth: boolean = false;
-  selectYear: boolean = false;
 
   dateChanged: (dm: IMyDateModel, close: boolean) => void;
   calendarViewChanged: (cvc: IMyCalendarViewChanged) => void;
@@ -56,18 +50,10 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
   closedByEsc: () => void;
   selectorPos: IMySelectorPosition = null;
 
-  prevViewDisabled: boolean = false;
-  nextViewDisabled: boolean = false;
+  prevViewDisabled = false;
+  nextViewDisabled = false;
 
-  clickListener: () => void;
-
-  constructor(private elem: ElementRef, private renderer: Renderer2, private cdr: ChangeDetectorRef, private utilService: UtilService) {
-    this.clickListener = renderer.listen(elem.nativeElement, CLICK, (event: any) => {
-      if ((this.opts.monthSelector || this.opts.yearSelector) && event.target) {
-        this.resetMonthYearSelect();
-      }
-    });
-  }
+  constructor(private renderer: Renderer2, private utilService: UtilService) { }
 
   ngAfterViewInit(): void {
     const {stylesData, calendarAnimation, inline} = this.opts;
@@ -87,10 +73,6 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    this.clickListener();
-  }
-
   initializeComponent(opts: IMyOptions, defaultMonth: string, selectedValue: any, inputValue: string, selectorPos: IMySelectorPosition, dc: (dm: IMyDateModel, close: boolean) => void, cvc: (cvc: IMyCalendarViewChanged) => void, rds: (rds: IMyRangeDateSelection) => void, cbe: () => void): void {
     this.opts = opts;
     this.selectorPos = selectorPos;
@@ -100,7 +82,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
     this.rangeDateSelection = rds;
     this.closedByEsc = cbe;
 
-    const {defaultView, dateRange, firstDayOfWeek, dayLabels} = this.opts;
+    const { dateRange, firstDayOfWeek, dayLabels } = this.opts;
 
     this.weekDays.length = 0;
     this.dayIdx = this.weekDayOpts.indexOf(firstDayOfWeek);
@@ -130,8 +112,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
         this.selectedDate = date;
         this.selectedMonth = {monthNbr: date.month, year: date.year};
       }
-    }
-    else {
+    } else {
       // Date range mode
       validateOpts = {validateDisabledDates: false, selectedValue: this.utilService.getSelectedValue(selectedValue, dateRange)};
       const {begin, end} = this.utilService.isDateValidDateRange(inputValue, this.opts, validateOpts);
@@ -143,29 +124,13 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
     }
 
     this.setCalendarVisibleMonth();
-
-    if (defaultView === DefaultView.Month) {
-      this.onMonthViewBtnClicked();
-    }
-    else if (defaultView === DefaultView.Year) {
-      this.onYearViewBtnClicked();
-    }
   }
 
   refreshComponent(opts: IMyOptions): void {
     this.opts = opts;
 
-    const {selectMonth, selectYear} = this;
-    if (!selectMonth && !selectYear) {
-      const {monthNbr, year} = this.visibleMonth;
-      this.generateCalendar(monthNbr, year, false);
-    }
-    else if (selectMonth) {
-      this.generateMonths();
-    }
-    else if (selectYear) {
-      this.generateYears(this.getYearValueByRowAndCol(2, 2)); 
-    }
+    const { monthNbr, year } = this.visibleMonth;
+    this.generateCalendar(monthNbr, year, false);
   }
 
   setCalendarAnimation(calAnimation: IMyCalendarAnimation, isOpen: boolean): void {
@@ -175,8 +140,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
     const classIn = MY_DP_ANIMATION + ANIMATION_NAMES[calAnimation.in - 1];
     if (isOpen) {
       renderer.addClass(nativeElement, classIn + IN);
-    }
-    else {
+    } else {
       const classOut = MY_DP_ANIMATION + ANIMATION_NAMES[calAnimation.out - 1];
       renderer.removeClass(nativeElement, classIn + IN);
       renderer.addClass(nativeElement, classOut + OUT);
@@ -186,8 +150,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
   resetDateValue(): void {
     if (!this.opts.dateRange) {
       this.selectedDate = this.utilService.resetDate();
-    }
-    else {
+    } else {
       this.selectedDateRange.begin = this.utilService.resetDate();
       this.selectedDateRange.end = this.utilService.resetDate();
     }
@@ -208,162 +171,6 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
     this.refreshComponent(this.opts);
   }
 
-  resetMonthYearSelect(): void {
-    this.selectMonth = false;
-    this.selectYear = false;
-  }
-
-  onMonthViewBtnClicked(): void {
-    this.selectMonth = !this.selectMonth;
-    this.selectYear = false;
-    
-    this.cdr.detectChanges();
-    if (this.selectMonth) {
-      this.generateMonths();
-    }
-    else {
-      const {year, monthNbr} = this.selectedMonth;
-      this.visibleMonth = {monthTxt: this.opts.monthLabels[monthNbr], monthNbr, year};
-      this.generateCalendar(monthNbr, year, true);
-    }
-  }
-
-  onMonthCellClicked(cell: IMyCalendarMonth): void {
-    const {year, monthNbr} = this.visibleMonth;
-
-    const mc: boolean = cell.nbr !== monthNbr;
-    this.visibleMonth = {monthTxt: this.opts.monthLabels[cell.nbr], monthNbr: cell.nbr, year: year};
-    this.selectedMonth.year = this.visibleMonth.year;
-    this.generateCalendar(cell.nbr, year, mc);
-    this.selectMonth = false;
-    this.focusToSelector();
-  }
-
-  onMonthCellKeyDown(event: any) {
-    // Move focus by arrow keys
-    const {sourceRow, sourceCol} = this.getSourceRowAndColumnFromEvent(event);
-    const {moveFocus, targetRow, targetCol, direction} = this.getTargetFocusRowAndColumn(event, sourceRow, sourceCol, MONTH_ROW_COUNT, MONTH_COL_COUNT);
-
-    if (moveFocus) {
-      this.focusCellElement(M, targetRow, targetCol, direction, MONTH_COL_COUNT);
-    }
-  }
-
-  onYearViewBtnClicked(): void {
-    this.selectYear = !this.selectYear;
-    this.selectMonth = false;
-
-    this.cdr.detectChanges();
-    if (this.selectYear) {
-      this.generateYears(this.visibleMonth.year);
-    }
-    else {
-      const {year, monthNbr} = this.selectedMonth;
-      this.visibleMonth = {monthTxt: this.opts.monthLabels[monthNbr], monthNbr, year};
-      this.generateCalendar(monthNbr, year, true);
-    }
-  }
-
-  onYearCellClicked(cell: IMyCalendarYear): void {
-    const {year, monthNbr, monthTxt} = this.visibleMonth;
-
-    const yc: boolean = cell.year !== year;
-    this.visibleMonth = {monthTxt: monthTxt, monthNbr: monthNbr, year: cell.year};
-    this.selectedMonth.year = this.visibleMonth.year;
-    this.generateCalendar(monthNbr, cell.year, yc);
-    this.selectYear = false;
-    this.focusToSelector();
-  }
-
-  onYearCellKeyDown(event: any) {
-    // Move focus by arrow keys
-    const {sourceRow, sourceCol} = this.getSourceRowAndColumnFromEvent(event);
-    const {moveFocus, targetRow, targetCol, direction} = this.getTargetFocusRowAndColumn(event, sourceRow, sourceCol, YEAR_ROW_COUNT, YEAR_COL_COUNT);
-
-    if (moveFocus) {
-      this.focusCellElement(Y, targetRow, targetCol, direction, YEAR_COL_COUNT);
-    }
-  }
-
-  generateMonths(): void {
-    const today: IMyDate = this.utilService.getToday();
-    this.months.length = 0;
-
-    const {year, monthNbr} = this.visibleMonth;
-    const {rtl, monthLabels} = this.opts;
-
-    let row: number = 0;
-    for (let i = 1; i <= 12; i += 3) {
-      const rowData: Array<IMyCalendarMonth> = [];
-      let col = rtl ? 2 : 0;
-
-      for (let j = i; j < i + 3; j++) {
-        const disabled: boolean = this.utilService.isDisabledMonth(year, j, this.daysInMonth(j, year), this.opts);
-        rowData.push({
-          nbr: j, 
-          name: monthLabels[j], 
-          currMonth: j === today.month && year === today.year, 
-          selected: j === monthNbr && year === this.selectedMonth.year, 
-          disabled,
-          row,
-          col: rtl ? col-- : col++
-        });
-      }
-      row++;
-      this.months.push(rowData);
-    }
-
-    this.setMonthViewHeaderBtnDisabledState(year);
-  }
-
-  generateYears(inputYear: number): void {
-    const {minYear, maxYear, rtl} = this.opts;
-
-    let y: number = inputYear - 12;
-    if (inputYear < minYear) {
-      y = minYear;
-    }
-
-    if (inputYear + 25 > maxYear) {
-      y = maxYear - 24;
-    }
-
-    const {year} = this.visibleMonth;
-
-    this.years.length = 0;
-    const today: IMyDate = this.utilService.getToday();
-
-    let row: number = 0;
-    for (let i = y; i < y + 25; i += 5) {
-      const rowData: Array<IMyCalendarYear> = [];
-      let col: number = rtl ? 4 : 0;
-
-      for (let j = i; j < i + 5; j++) {
-        const disabled: boolean = this.utilService.isDisabledYear(j, this.opts);
-        rowData.push({
-          year: j, 
-          currYear: j === today.year, 
-          selected: j === year, 
-          disabled,
-          row,
-          col: rtl ? col-- : col++
-        });
-      }
-      row++;
-      this.years.push(rowData);
-    }
-
-    const beginYear: number = this.getYearValueByRowAndCol(0, 0);
-    const endYear: number = beginYear + 24;
-    this.yearsDuration = (!rtl ? beginYear : endYear) + YEAR_SEPARATOR + (!rtl ? endYear : beginYear);
-
-    this.setYearViewHeaderBtnDisabledState(beginYear, endYear);
-  }
-
-  getYearValueByRowAndCol(row: number, col: number): number {
-    return this.years[row][col].year;
-  }
-
   setCalendarVisibleMonth(): void {
     // Sets visible month of calendar
     const {year, monthNbr} = this.selectedMonth;
@@ -373,30 +180,12 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
     this.generateCalendar(monthNbr, year, true);
   }
 
-  onPrevNavigateBtnClicked(): void {
-    if (!this.selectMonth && !this.selectYear) {
-      this.setDateViewMonth(false);
-    }
-    else if (this.selectMonth) {
-      this.visibleMonth.year--;
-      this.generateMonths();
-    }
-    else if (this.selectYear) {
-      this.generateYears(this.getYearValueByRowAndCol(2, 2) - 25);
-    }
+  onPrevNavigateBtnClicked() {
+    this.setDateViewMonth(false);
   }
 
   onNextNavigateBtnClicked(): void {
-    if (!this.selectMonth && !this.selectYear) {
-      this.setDateViewMonth(true);
-    }
-    else if (this.selectMonth) {
-      this.visibleMonth.year++;
-      this.generateMonths();
-    }
-    else if (this.selectYear) {
-      this.generateYears(this.getYearValueByRowAndCol(2, 2) + 25);
-    }
+    this.setDateViewMonth(true);
   }
 
   setDateViewMonth(isNext: boolean): void {
@@ -424,7 +213,6 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
   onDayCellClicked(cell: IMyCalendarDay): void {
     // Cell clicked on the calendar
     this.selectDate(cell.dateObj);
-    this.resetMonthYearSelect();
   }
 
   onDayCellKeyDown(event: any) {
@@ -457,19 +245,15 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
     const keyCode: number = this.utilService.getKeyCodeFromEvent(event);
     if (keyCode === KeyCode.upArrow && row > 0) {
       targetRow--;
-    }
-    else if (keyCode === KeyCode.downArrow && row < rowCount) {
+    } else if (keyCode === KeyCode.downArrow && row < rowCount) {
       targetRow++;
       direction = true;
-    }
-    else if (keyCode === KeyCode.leftArrow && col > 0) {
+    } else if (keyCode === KeyCode.leftArrow && col > 0) {
       targetCol--;
-    }
-    else if (keyCode === KeyCode.rightArrow && col < colCount) {
+    } else if (keyCode === KeyCode.rightArrow && col < colCount) {
       targetCol++;
       direction = true;
-    }
-    else {
+    } else {
       moveFocus = false;
     }
     return {moveFocus, targetRow, targetCol, direction};
@@ -488,15 +272,13 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
       if (direction) {
         // find next enabled
         enabledElem = tdList.slice(idx).find((td: any) => td.getAttribute(TABINDEX) === ZERO_STR);
-      }
-      else {
+      } else {
         // find previous enabled
         enabledElem = tdList.slice(0, idx).reverse().find((td: any) => td.getAttribute(TABINDEX) === ZERO_STR);
       }
 
       elem = enabledElem ? enabledElem : this.selectorEl.nativeElement;
-    }
-    else {
+    } else {
       elem.focus();
     }
   }
@@ -528,8 +310,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
           formatted: this.utilService.formatDate(date, dateFormat, monthLabels),
           epoc: this.utilService.getEpocTime(date)
         });
-      }
-      else if (!isBeginDateInitialized) {
+      } else if (!isBeginDateInitialized) {
         // begin date
         this.selectedDateRange.begin = date;
         this.rangeDateSelection({
@@ -540,9 +321,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
           formatted: this.utilService.formatDate(date, dateFormat, monthLabels),
           epoc: this.utilService.getEpocTime(date)
         });
-
-      }
-      else {
+      } else {
         // second selection
         const firstDateEarlier: boolean = this.utilService.isDateEarlier(date, this.selectedDateRange.begin);
         if (firstDateEarlier) {
@@ -555,8 +334,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
             formatted: this.utilService.formatDate(date, dateFormat, monthLabels),
             epoc: this.utilService.getEpocTime(date)
           });
-        }
-        else {
+        } else {
           this.selectedDateRange.end = date;
           this.rangeDateSelection({
             isBegin: false,
@@ -570,8 +348,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
           this.dateChanged(this.utilService.getDateModel(null, this.selectedDateRange, dateFormat, monthLabels, dateRangeDatesDelimiter), closeSelectorOnDateSelect);
         }
       }
-    }
-    else {
+    } else {
       // Single date
       this.selectedDate = date;
       this.dateChanged(this.utilService.getDateModel(this.selectedDate, null, dateFormat, monthLabels, dateRangeDatesDelimiter), closeSelectorOnDateSelect);
@@ -646,7 +423,8 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
         // Previous month
         for (let j = pm; j <= dInPrevM; j++) {
           const date: IMyDate = {year: m === 1 ? y - 1 : y, month: m === 1 ? 12 : m - 1, day: j};
-          week.push({dateObj: date,
+          week.push({
+            dateObj: date,
             cmo,
             currDay: this.isCurrDay(j, month - 1, y, today),
             disabled: this.utilService.isDisabledDate(date, this.opts),
@@ -654,7 +432,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
             highlight: this.utilService.isHighlightedDate(date, sunHighlight, satHighlight, highlightDates),
             row: i - 1,
             col: rtl ? col-- : col++
-          }); 
+          });
         }
 
         cmo = MonthId.curr;
@@ -662,7 +440,8 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
         const daysLeft: number = 7 - week.length;
         for (let j = 0; j < daysLeft; j++) {
           const date: IMyDate = {year: y, month: m, day: dayNbr};
-          week.push({dateObj: date,
+          week.push({
+            dateObj: date,
             cmo,
             currDay: this.isCurrDay(dayNbr, m, y, today),
             disabled: this.utilService.isDisabledDate(date, this.opts),
@@ -684,7 +463,8 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
             month = m + 1;
           }
           const date: IMyDate = {year: cmo === MonthId.next && m === 12 ? y + 1 : y, month: cmo === MonthId.curr ? m : cmo === MonthId.next && m < 12 ? m + 1 : 1, day: dayNbr};
-          week.push({dateObj: date,
+          week.push({
+            dateObj: date,
             cmo,
             currDay: this.isCurrDay(dayNbr, month, y, today),
             disabled: this.utilService.isDisabledDate(date, this.opts),
@@ -712,7 +492,7 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
     let dpm: boolean = false;
     let dnm: boolean = false;
 
-    const {disableHeaderButtons, disableUntil, disableSince, minYear, maxYear, rtl} = this.opts;
+    const {disableHeaderButtons, disableUntil, disableSince, minYear, maxYear} = this.opts;
 
     if (disableHeaderButtons) {
       dpm = this.utilService.isDisabledByDisableUntil({year: m === 1 ? y - 1 : y, month: m === 1 ? 12 : m - 1, day: this.daysInMonth(m === 1 ? 12 : m - 1, m === 1 ? y - 1 : y)}, disableUntil);
@@ -720,49 +500,5 @@ export class CalendarComponent implements AfterViewInit, OnDestroy {
     }
     this.prevViewDisabled = m === 1 && y === minYear || dpm;
     this.nextViewDisabled = m === 12 && y === maxYear || dnm;
-
-    if (rtl) {
-      this.swapHeaderBtnDisabled();
-    }
-  }
-
-  setMonthViewHeaderBtnDisabledState(y: number): void {
-    let dpm: boolean = false;
-    let dnm: boolean = false;
-
-    const {disableHeaderButtons, disableUntil, disableSince, minYear, maxYear, rtl} = this.opts;
-
-    if (disableHeaderButtons) {
-      dpm = this.utilService.isDisabledByDisableUntil({year: y - 1, month: 12, day: 31}, disableUntil);
-      dnm = this.utilService.isDisabledByDisableSince({year: y + 1, month: 1, day: 1}, disableSince);
-    }
-    this.prevViewDisabled = y === minYear || dpm;
-    this.nextViewDisabled = y === maxYear || dnm;
-
-    if (rtl) {
-      this.swapHeaderBtnDisabled();
-    }
-  }
-
-  setYearViewHeaderBtnDisabledState(yp: number, yn: number): void {
-    let dpy: boolean = false;
-    let dny: boolean = false;
-
-    const {disableHeaderButtons, disableUntil, disableSince, minYear, maxYear, rtl} = this.opts;
-
-    if (disableHeaderButtons) {
-      dpy = this.utilService.isDisabledByDisableUntil({year: yp - 1, month: 12, day: 31}, disableUntil);
-      dny = this.utilService.isDisabledByDisableSince({year: yn + 1, month: 1, day: 1}, disableSince);
-    }
-    this.prevViewDisabled = yp <= minYear || dpy;
-    this.nextViewDisabled = yn >= maxYear || dny;
-
-    if (rtl) {
-      this.swapHeaderBtnDisabled();
-    }
-  }
-
-  swapHeaderBtnDisabled(): void {
-    [this.prevViewDisabled, this.nextViewDisabled] = [this.nextViewDisabled, this.prevViewDisabled];
   }
 }

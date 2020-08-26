@@ -5,8 +5,6 @@ export {AngularMyDatePickerModule} from "./lib/angular-mydatepicker.module";
 export {AngularMyDatePickerDirective} from "./lib/angular-mydatepicker.input";
 export {CalendarComponent} from "./lib/components/calendar/calendar.component";
 export {DayViewComponent} from "./lib/components/day-view/day-view.component";
-export {MonthViewComponent} from "./lib/components/month-view/month-view.component";
-export {YearViewComponent} from "./lib/components/year-view/year-view.component";
 export {SelectionBarComponent} from "./lib/components/selection-bar/selection-bar.component";
 
 export {UtilService} from "./lib/services/angular-mydatepicker.util.service";

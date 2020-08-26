@@ -22,8 +22,8 @@ export class DayViewComponent implements OnChanges {
   @Input() selectedDate: IMyDate;
   @Input() selectedDateRange: IMyDateRange;
 
-  @Output() dayCellClicked: EventEmitter<IMyCalendarDay> = new EventEmitter<IMyCalendarDay>();
-  @Output() dayCellKeyDown: EventEmitter<any> = new EventEmitter<any>();
+  @Output() dayCellClicked = new EventEmitter<IMyCalendarDay>();
+  @Output() dayCellKeyDown = new EventEmitter<any>();
 
   prevMonthId: number = MonthId.prev;
   currMonthId: number = MonthId.curr;
@@ -59,15 +59,14 @@ export class DayViewComponent implements OnChanges {
     this.dayCellClicked.emit(cell);
   }
 
-  onDayCellKeyDown(event: any, cell: IMyCalendarDay) {
-    const keyCode: number = this.utilService.getKeyCodeFromEvent(event);
+  onDayCellKeyDown(event: any, cell: IMyCalendarDay): void {
+    const keyCode = this.utilService.getKeyCodeFromEvent(event);
     if (keyCode !== KeyCode.tab) {
       event.preventDefault();
 
       if (keyCode === KeyCode.enter || keyCode === KeyCode.space) {
         this.onDayCellClicked(event, cell);
-      }
-      else if (this.opts.moveFocusByArrowKeys) {
+      } else if (this.opts.moveFocusByArrowKeys) {
         this.dayCellKeyDown.emit(event)
       }
     }
@@ -91,5 +90,17 @@ export class DayViewComponent implements OnChanges {
 
   isDateRangeEnd(date: IMyDate): boolean {
     return this.utilService.isDateRangeEnd(this.selectedDateRange, date);
+  }
+
+  isDisabledRangeBegin({ disabled }: IMyCalendarDay): boolean {
+    return disabled && typeof disabled === 'object' && disabled.disabledRangeBegin;
+  }
+
+  isDisabledRangeEnd({ disabled }: IMyCalendarDay): boolean {
+    return disabled && typeof disabled === 'object' && disabled.disabledRangeEnd;
+  }
+
+  isDisabledRange({ disabled }: IMyCalendarDay): boolean {
+    return disabled && typeof disabled === 'object' && disabled.disabledRange;
   }
 }

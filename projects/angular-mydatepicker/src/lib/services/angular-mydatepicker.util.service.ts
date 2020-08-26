@@ -41,11 +41,9 @@ export class UtilService {
       const {format} = dv;
       if (format.indexOf(YYYY) !== -1) {
         year = this.getNumberByValue(dv);
-      }
-      else if (format.indexOf(M) !== -1) {
+      } else if (format.indexOf(M) !== -1) {
         month = isMonthStr ? this.getMonthNumberByMonthName(dv, monthLabels) : this.getNumberByValue(dv);
-      }
-      else if (format.indexOf(D) !== -1) {
+      } else if (format.indexOf(D) !== -1) {
         day = this.getNumberByValue(dv);
       }
     }
@@ -173,8 +171,7 @@ export class UtilService {
     let nbr: number = Number(df.value);
     if (df.format.length === 1 && df.value.length !== 1 && nbr < 10 || df.format.length === 1 && df.value.length !== 2 && nbr >= 10) {
       nbr = -1;
-    }
-    else if (df.format.length === 2 && df.value.length > 2) {
+    } else if (df.format.length === 2 && df.value.length > 2) {
       nbr = -1;
     }
     return nbr;
@@ -190,7 +187,7 @@ export class UtilService {
     return month;
   }
 
-  isDisabledDate(date: IMyDate, options: IMyOptions): boolean {
+  isDisabledDate(date: IMyDate, options: IMyOptions): boolean | { disabledRangeBegin?: boolean, disabledRangeEnd?: boolean; disabledRange: boolean } {
     const {minYear, maxYear, disableUntil, disableSince, disableWeekends, disableDates, disableDateRanges, disableWeekdays, enableDates} = options;
 
     for (const d of enableDates) {
@@ -233,8 +230,9 @@ export class UtilService {
       }
     }
 
+    const isDisabledByDisableDateRange = this.isDisabledByDisableDateRange(date, date, disableDateRanges);
     if (this.isDisabledByDisableDateRange(date, date, disableDateRanges)) {
-      return true;
+      return isDisabledByDisableDateRange;
     }
 
     return false;
@@ -294,14 +292,20 @@ export class UtilService {
     return this.isInitializedDate(disableSince) && this.getTimeInMilliseconds(date) >= this.getTimeInMilliseconds(disableSince);
   }
 
-  isDisabledByDisableDateRange(dateBegin: IMyDate, dateEnd: IMyDate, disableDateRanges: Array<IMyDateRange>): boolean {
-    const dateMsBegin: number = this.getTimeInMilliseconds(dateBegin);
-    const dateMsEnd: number = this.getTimeInMilliseconds(dateEnd);
+  isDisabledByDisableDateRange(dateBegin: IMyDate, dateEnd: IMyDate, disableDateRanges: Array<IMyDateRange>): boolean | { disabledRangeBegin?: boolean, disabledRangeEnd?: boolean; disabledRange: boolean } {
+    const dateMsBegin = this.getTimeInMilliseconds(dateBegin);
+    const dateMsEnd = this.getTimeInMilliseconds(dateEnd);
 
     for (const d of disableDateRanges) {
-      if (this.isInitializedDate(d.begin) && this.isInitializedDate(d.end) 
-        && dateMsBegin >= this.getTimeInMilliseconds(d.begin) && dateMsEnd <= this.getTimeInMilliseconds(d.end)) {
-        return true;
+      if (this.isInitializedDate(d.begin) && this.isInitializedDate(d.end)) {
+        const dMsBegin = this.getTimeInMilliseconds(d.begin);
+        const dMsEnd = this.getTimeInMilliseconds(d.end);
+
+        if (dateMsBegin >= dMsBegin && dateMsEnd <= dMsEnd) {
+          const disabledRangeBegin = dateMsBegin === dMsBegin;
+          const disabledRangeEnd = dateMsEnd === dMsEnd;
+          return { disabledRangeBegin, disabledRangeEnd, disabledRange: true };
+        }
       }
     }
     return false;
@@ -354,8 +358,7 @@ export class UtilService {
         formatted: dateStr.length ? dateStr : this.formatDate(date, dateFormat, monthLabels),
         epoc: this.getEpocTime(date)
       };
-    }
-    else {
+    } else {
       dateRangeModel = {
         beginDate: dateRange.begin,
         beginJsDate: this.getDate(dateRange.begin),
@@ -379,18 +382,15 @@ export class UtilService {
 
     if (dateFormat.indexOf(MMM) !== -1) {
       formatted = formatted.replace(MMM, monthLabels[date.month]);
-    }
-    else if (dateFormat.indexOf(MM) !== -1) {
+    } else if (dateFormat.indexOf(MM) !== -1) {
       formatted = formatted.replace(MM, this.preZero(date.month));
-    }
-    else {
+    } else {
       formatted = formatted.replace(M, String(date.month));
     }
 
     if (dateFormat.indexOf(DD) !== -1) {
       formatted = formatted.replace(DD, this.preZero(date.day));
-    }
-    else {
+    } else {
       formatted = formatted.replace(D, String(date.day));
     }
     return formatted;
@@ -478,8 +478,7 @@ export class UtilService {
 
     if (!dateRange) {
       return selectedValue.date;
-    }
-    else {
+    } else {
       const {beginDate, endDate} = selectedValue;
       return {begin: beginDate, end: endDate};
     }
@@ -490,32 +489,23 @@ export class UtilService {
 
     if (this.checkKeyName(key, KeyName.enter) || key === KeyCode.enter) {
       return KeyCode.enter;
-    }
-    else if (this.checkKeyName(key, KeyName.esc) || key === KeyCode.esc) {
+    } else if (this.checkKeyName(key, KeyName.esc) || key === KeyCode.esc) {
       return KeyCode.esc;
-    }
-    else if (this.checkKeyName(key, KeyName.space) || key === KeyCode.space) {
+    } else if (this.checkKeyName(key, KeyName.space) || key === KeyCode.space) {
       return KeyCode.space;
-    }
-    else if (this.checkKeyName(key, KeyName.leftArrow) || key === KeyCode.leftArrow) {
+    } else if (this.checkKeyName(key, KeyName.leftArrow) || key === KeyCode.leftArrow) {
       return KeyCode.leftArrow;
-    }
-    else if (this.checkKeyName(key, KeyName.upArrow) || key === KeyCode.upArrow) {
+    } else if (this.checkKeyName(key, KeyName.upArrow) || key === KeyCode.upArrow) {
       return KeyCode.upArrow;
-    }
-    else if (this.checkKeyName(key, KeyName.rightArrow) || key === KeyCode.rightArrow) {
+    } else if (this.checkKeyName(key, KeyName.rightArrow) || key === KeyCode.rightArrow) {
       return KeyCode.rightArrow;
-    }
-    else if (this.checkKeyName(key, KeyName.downArrow)|| key === KeyCode.downArrow) {
+    } else if (this.checkKeyName(key, KeyName.downArrow)|| key === KeyCode.downArrow) {
       return KeyCode.downArrow;
-    }
-    else if (this.checkKeyName(key, KeyName.tab) || key === KeyCode.tab) {
+    } else if (this.checkKeyName(key, KeyName.tab) || key === KeyCode.tab) {
       return KeyCode.tab;
-    }
-    else if (this.checkKeyName(key, KeyName.shift) || key === KeyCode.shift) {
+    } else if (this.checkKeyName(key, KeyName.shift) || key === KeyCode.shift) {
       return KeyCode.shift;
-    }
-    else {
+    } else {
       return null;
     }
   }
