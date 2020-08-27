@@ -2,13 +2,13 @@
 <div class="ng-mydp {{opts.stylesData?.selector || ''}}">
   <div
     class="myDpSelector"
-    #selectorEl 
+    #selectorEl
     [libAngularMyDatePickerCalendar]="{
       inline: opts.inline,
       selectorWidth: opts.selectorWidth,
       selectorHeight: opts.selectorHeight,
       selectorPos: selectorPos
-    }" 
+    }"
     [ngClass]="{
       'myDpSelectorAbsolute': !opts.inline,
       'myDpSelectorPosInitial': opts.inline
